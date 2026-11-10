@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<meta name="description" content="{{ desc }}">
+<meta name="keywords" content="video downloader, youtube video downloader, facebook video downloader, instagram reels downloader, tiktok video downloader, youtube to shorts converter, download part of youtube video, youtube to mp4, youtube to mp3">
+<link rel="canonical" href="{{ base }}/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ site_name }}">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ desc }}">
+<meta property="og:url" content="{{ base }}/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title }}">
+<meta name="twitter:description" content="{{ desc }}">
+<meta name="theme-color" content="#5b3df5">
+{% if ga_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga_id }}');</script>{% endif %}
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%235b3df5'/%3E%3Cpath d='M20 18v28M44 18v28M20 32h24' stroke='%23fff' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+{% for block in ld %}<script type="application/ld+json">{{ block|tojson }}</script>
+{% endfor %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f1f0fb; --surface:#ffffff; --ink:#17163a; --muted:#5d5c80; --line:#dcdaf0;
+    --brand:#5b3df5; --brand-ink:#ffffff; --hot:#ff5d73; --err:#c0262d; --soft:#e7e4fb;
+    --radius:20px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#11102a; --surface:#1b1a3d; --ink:#ecebff; --muted:#a2a1c8; --line:#2e2d5c;
+            --brand:#8b78ff; --brand-ink:#0f0d2b; --hot:#ff7a8c; --err:#ff8a80; --soft:#25244f; }
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:'Plus Jakarta Sans',system-ui,sans-serif; font-size:17px; line-height:1.65; }
+  a { color:var(--brand); }
+  .wrap { max-width:960px; margin:0 auto; padding:0 20px; }
+  h1,h2,h3 { font-family:'Unbounded','Plus Jakarta Sans',sans-serif; line-height:1.15; letter-spacing:-0.02em; margin:0; }
+
+  header.top { display:flex; align-items:center; justify-content:space-between; padding:22px 0; }
+  .logo { display:flex; align-items:center; gap:10px; font-family:'Unbounded',sans-serif; font-weight:700; font-size:1.1rem; color:var(--ink); text-decoration:none; }
+  .logo svg { width:34px; height:34px; }
+  nav a { margin-left:22px; color:var(--muted); text-decoration:none; font-weight:500; font-size:.95rem; }
+  nav a:hover { color:var(--ink); }
+  @media (max-width:560px){ nav a:not(:last-child){ display:none; } }
+
+  .hero { padding:36px 0 28px; }
+  .hero h1 { font-size:clamp(2rem,6.2vw,3.7rem); max-width:17ch; font-weight:700; }
+  .hero p.lead { color:var(--muted); font-size:1.12rem; max-width:52ch; margin:18px 0 0; }
+
+  .tool { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:clamp(16px,3vw,28px);
+          box-shadow:0 24px 60px -30px rgba(91,61,245,.45); margin-top:30px; }
+  label.lbl { display:block; font-weight:700; font-size:.95rem; margin-bottom:6px; }
+  input[type=text], input[type=url], select {
+    width:100%; padding:14px 16px; font:inherit; color:var(--ink); background:var(--bg);
+    border:1.5px solid var(--line); border-radius:14px; }
+  input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible, .tab:focus-within {
+    outline:3px solid var(--brand); outline-offset:2px; }
+  .url-row { display:flex; gap:10px; }
+  .url-row input { flex:1; min-width:0; }
+  button { font:inherit; font-weight:700; border:0; border-radius:14px; background:var(--brand); color:var(--brand-ink); cursor:pointer; padding:14px 22px; }
+  button:hover:not(:disabled) { filter:brightness(1.08); }
+  button:disabled { opacity:.6; cursor:wait; }
+  @media (max-width:520px){ .url-row { flex-direction:column; } }
+
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .chip { font-size:.85rem; font-weight:700; padding:5px 13px; border-radius:999px; background:var(--soft); color:var(--muted); transition:background .15s,color .15s; }
+  .chip.on { background:var(--brand); color:var(--brand-ink); }
+  #preview { display:none; margin-top:22px; gap:16px; align-items:center; }
+  #preview.show { display:flex; }
+  #preview img { width:140px; aspect-ratio:16/9; object-fit:cover; border-radius:12px; flex:none; }
+  #title { font-weight:700; margin:0; line-height:1.35; }
+  #meta { color:var(--muted); font-size:.9rem; margin:2px 0 0; }
+
+  #editor { display:none; margin-top:22px; }
+  #editor.show { display:block; }
+  .tabs { display:inline-flex; background:var(--bg); border:1.5px solid var(--line); border-radius:14px; padding:4px; gap:4px; }
+  .tab { position:relative; padding:9px 18px; border-radius:10px; cursor:pointer; font-weight:700; font-size:.95rem; color:var(--muted); }
+  .tab input { position:absolute; opacity:0; inset:0; cursor:pointer; }
+  .tab:has(input:checked) { background:var(--brand); color:var(--brand-ink); }
+
+  /* Film-strip trim timeline */
+  #clipBox.hide { display:none; }
+  .timeline { position:relative; height:76px; margin:22px 0 14px; border-radius:14px; overflow:hidden; background:var(--soft); }
+  .timeline .strip { position:absolute; inset:0; background-size:auto 100%; background-repeat:repeat-x; background-position:left center; }
+  .timeline .strip::after { content:""; position:absolute; inset:0;
+    background:repeating-linear-gradient(90deg, transparent 0 54px, rgba(0,0,0,.28) 54px 56px); }
+  .timeline.empty .strip { background-image:linear-gradient(110deg,var(--soft),var(--line),var(--soft)); }
+  .dim { position:absolute; top:0; bottom:0; background:rgba(17,16,42,.68); pointer-events:none; }
+  .win { position:absolute; top:0; bottom:0; border-top:4px solid var(--hot); border-bottom:4px solid var(--hot); pointer-events:none; }
+  .timeline input[type=range] { position:absolute; inset:0; width:100%; height:100%; margin:0; background:transparent;
+    -webkit-appearance:none; appearance:none; pointer-events:none; }
+  .timeline input[type=range]::-webkit-slider-runnable-track { background:transparent; height:100%; }
+  .timeline input[type=range]::-moz-range-track { background:transparent; height:100%; }
+  .timeline input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; pointer-events:auto; cursor:ew-resize;
+    width:16px; height:76px; border-radius:6px; border:0; background:var(--hot) linear-gradient(90deg,transparent 6px,rgba(255,255,255,.9) 6px 8px,transparent 8px 10px); }
+  .timeline input[type=range]::-moz-range-thumb { pointer-events:auto; cursor:ew-resize; width:16px; height:76px; border-radius:6px; border:0;
+    background:var(--hot) linear-gradient(90deg,transparent 6px,rgba(255,255,255,.9) 6px 8px,transparent 8px 10px); }
+  .timeline.empty input[type=range] { display:none; }
+
+  .times { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  .times .len { display:flex; flex-direction:column; justify-content:flex-end; }
+  .times .len output { padding:14px 16px; font-weight:700; color:var(--hot); border:1.5px dashed var(--line); border-radius:14px; text-align:center; }
+  .opts { display:grid; grid-template-columns:1fr; gap:12px; margin-top:16px; }
+  .hide { display:none !important; }
+  small.hint { display:block; color:var(--muted); font-size:.88rem; margin-top:10px; }
+  button.go { width:100%; margin-top:20px; padding:17px; font-size:1.05rem; position:relative; overflow:hidden; }
+  button.go.busy::after { content:""; position:absolute; left:0; bottom:0; height:4px; width:40%; background:rgba(255,255,255,.7); animation:slide 1.1s linear infinite; }
+  @keyframes slide { from { transform:translateX(-100%); } to { transform:translateX(250%); } }
+  #msg { min-height:1.6em; margin-top:14px; font-size:.95rem; color:var(--muted); }
+  #msg.err { color:var(--err); font-weight:500; }
+
+  section.block { padding:68px 0 0; }
+  section.block h2 { font-size:clamp(1.5rem,4vw,2.2rem); font-weight:700; max-width:22ch; }
+  section.block > p.sub { color:var(--muted); max-width:58ch; margin:14px 0 0; }
+
+  .why { margin-top:34px; display:grid; gap:0; }
+  .why > div { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:24px; padding:24px 0; border-top:1.5px solid var(--line); }
+  .why h3 { font-size:1.15rem; font-weight:500; }
+  .why p { margin:0; color:var(--muted); }
+  @media (max-width:640px){ .why > div { grid-template-columns:1fr; gap:8px; } }
+
+  ol.steps { margin:30px 0 0; padding:0; list-style:none; counter-reset:s; display:grid; gap:14px; }
+  ol.steps li { counter-increment:s; display:flex; gap:16px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; }
+  ol.steps li::before { content:counter(s); flex:none; width:36px; height:36px; border-radius:50%; background:var(--brand); color:var(--brand-ink); font-family:'Unbounded',sans-serif; font-weight:700; display:grid; place-items:center; }
+  ol.steps strong { display:block; }
+  ol.steps span { color:var(--muted); }
+
+  .tablewrap { overflow-x:auto; margin-top:28px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); }
+  table { border-collapse:collapse; width:100%; min-width:520px; }
+  th,td { text-align:left; padding:14px 18px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:last-child td { border-bottom:0; }
+  th { font-family:'Unbounded',sans-serif; font-weight:500; font-size:.85rem; }
+  td:last-child { color:var(--muted); }
+
+  .faq { margin-top:28px; border-top:1.5px solid var(--line); }
+  details { border-bottom:1.5px solid var(--line); padding:18px 4px; }
+  summary { cursor:pointer; font-weight:700; list-style:none; display:flex; justify-content:space-between; gap:16px; }
+  summary::-webkit-details-marker { display:none; }
+  summary::after { content:"+"; font-size:1.4rem; line-height:1; color:var(--brand); transition:transform .2s; }
+  details[open] summary::after { transform:rotate(45deg); }
+  details p { margin:12px 0 0; color:var(--muted); max-width:62ch; }
+
+  footer { margin-top:80px; padding:30px 0 50px; border-top:1.5px solid var(--line); color:var(--muted); font-size:.9rem; }
+  footer p { margin:0 0 8px; max-width:70ch; }
+  @media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto;} button.go.busy::after{animation:none;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="/" aria-label="{{ site_name }} home">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#5b3df5"/><path d="M20 18v28M44 18v28M20 32h24" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>
+      {{ site_name }}
+    </a>
+    <nav aria-label="Main"><a href="#how">How it works</a><a href="#formats">Formats</a><a href="#faq">FAQ</a></nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Video downloader and Shorts maker</h1>
+      <p class="lead">Paste a YouTube, Facebook, Instagram or TikTok link. Download the whole video, cut just the moment you need, or turn it into a vertical Short.</p>
+
+      <div class="tool" id="tool">
+        <label class="lbl" for="url">Video link</label>
+        <div class="url-row">
+          <input id="url" type="url" placeholder="Paste a YouTube, Facebook, Instagram or TikTok link" autocomplete="off">
+          <button id="check" type="button">Find video</button>
+        </div>
+        <div class="chips" aria-label="Supported websites">
+          <span class="chip" data-p="YouTube">YouTube</span><span class="chip" data-p="Facebook">Facebook</span>
+          <span class="chip" data-p="Instagram">Instagram</span><span class="chip" data-p="TikTok">TikTok</span>
+        </div>
+
+        <div id="preview">
+          <img id="thumb" alt="Video thumbnail">
+          <div><p id="title"></p><p id="meta"></p></div>
+        </div>
+
+        <div id="editor">
+          <div class="tabs" role="radiogroup" aria-label="Download type">
+            <label class="tab"><input type="radio" name="mode" value="clip" checked>Clip a part</label>
+            <label class="tab"><input type="radio" name="mode" value="full">Full video</label>
+            <label class="tab"><input type="radio" name="mode" value="short">Make a Short</label>
+          </div>
+
+          <div id="clipBox">
+            <div class="timeline empty" id="timeline">
+              <div class="strip" id="strip"></div>
+              <div class="dim" id="dimL" style="left:0;width:0"></div>
+              <div class="dim" id="dimR" style="right:0;width:0"></div>
+              <div class="win" id="win"></div>
+              <input type="range" id="rs" min="0" max="100" step="1" value="0" aria-label="Clip start">
+              <input type="range" id="re" min="0" max="100" step="1" value="20" aria-label="Clip end">
+            </div>
+            <div class="times">
+              <div><label class="lbl" for="start">Start</label><input id="start" type="text" value="0:00" inputmode="numeric"></div>
+              <div><label class="lbl" for="end">End</label><input id="end" type="text" value="0:20" inputmode="numeric"></div>
+              <div class="len"><output id="len" aria-label="Clip length">0:20</output></div>
+            </div>
+          </div>
+
+          <div class="opts">
+            <div id="qualityWrap"><label class="lbl" for="quality">Quality</label><select id="quality"></select></div>
+            <div id="styleWrap" class="hide"><label class="lbl" for="style">Short style</label>
+              <select id="style">
+                <option value="blur">Blurred background (whole frame visible)</option>
+                <option value="crop">Crop to fill the screen</option>
+              </select></div>
+          </div>
+          <small class="hint" id="hint"></small>
+          {% if cpa_url %}<small class="hint">Sponsored: pressing the button also opens a partner offer in a new tab. Your download continues in this tab.</small>{% endif %}
+          <button class="go" id="go" type="button">Download clip</button>
+        </div>
+
+        <div id="msg" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="block" id="why">
+      <h2>Why people use this video downloader and Shorts maker</h2>
+      <div class="why">
+        <div><h3>One tool for every platform</h3><p>Paste a link from YouTube, Facebook, Instagram or TikTok and the site recognises it automatically. There is nothing to choose and nothing to install.</p></div>
+        <div><h3>Download only the part you need</h3><p>Most YouTube downloaders force you to save the whole video and trim it later. Here you choose the start and end first, so you download seconds instead of minutes of footage.</p></div>
+        <div><h3>Pick your video quality</h3><p>The quality menu shows what each video actually offers, from 144p to 4K, plus Best available. Choose a small file for sharing or full HD for editing.</p></div>
+        <div><h3>Turn any video into a Short</h3><p>Pick a moment of up to {{ max_short }} seconds and get a vertical 1080x1920 video, with a blurred background or a full-screen crop. It is ready for YouTube Shorts, Reels and TikTok.</p></div>
+        <div><h3>MP4 video or MP3 audio</h3><p>Save a clip as MP4, or switch to Audio only and get an MP3 of a song section, a podcast moment or a spoken quote.</p></div>
+        <div><h3>Works on phone and computer</h3><p>No app, no signup and no extension. Open the page in any modern browser, paste the link and download.</p></div>
+      </div>
+    </section>
+
+    <section class="block" id="how">
+      <h2>How to download a video, a clip or a Short</h2>
+      <ol class="steps">
+        <li><div><strong>Paste the link</strong><span>Copy the video address from YouTube, Facebook, Instagram or TikTok and press Find video.</span></div></li>
+        <li><div><strong>Choose clip, full video or Short</strong><span>For a section, drag the two handles on the timeline or type the start and end time.</span></div></li>
+        <li><div><strong>Select quality and format</strong><span>Pick a resolution such as 1080p or 720p, or choose Audio only for MP3.</span></div></li>
+        <li><div><strong>Download</strong><span>Press the download button and your file is saved to your device.</span></div></li>
+      </ol>
+    </section>
+
+    <section class="block" id="formats">
+      <h2>Quality and format guide</h2>
+      <p class="sub">Not sure which option to choose? Start here.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Option</th><th>Best for</th></tr></thead>
+          <tbody>
+            <tr><td>4K, 1440p</td><td>Editing, large screens and archiving, when the video offers it. Files are big.</td></tr>
+            <tr><td>1080p (Full HD)</td><td>Good quality for most uses, including social posts and presentations.</td></tr>
+            <tr><td>720p, 480p</td><td>Smaller files that are quick to download and share on messaging apps.</td></tr>
+            <tr><td>360p, 240p, 144p</td><td>Very small files for slow connections or limited storage.</td></tr>
+            <tr><td>Make a Short (1080x1920)</td><td>Vertical videos for YouTube Shorts, Instagram Reels and TikTok. Choose blurred background or crop.</td></tr>
+            <tr><td>Audio only (MP3)</td><td>Music sections, interviews, lectures and podcast clips.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block" id="faq">
+      <h2>Frequently asked questions</h2>
+      <div class="faq">
+        {% for q, a in faqs %}<details><summary>{{ q }}</summary><p>{{ a }}</p></details>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>{{ site_name }} is for downloading content you own, content in the public domain or under a Creative Commons licence, and content you have permission to use. You are responsible for following copyright law and YouTube’s Terms of Service.</p>
+    <p>{{ site_name }} is not affiliated with or endorsed by YouTube, Google, Meta, Facebook, Instagram or TikTok. All trademarks belong to their owners.</p>
+  </footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const MAXCLIP = {{ max_clip }}, MAXSHORT = {{ max_short }};
+const maxLen = () => mode()==='short' ? MAXSHORT : MAXCLIP;
+const msg = (t, err=false) => { $('msg').textContent = t; $('msg').className = err ? 'err' : ''; };
+const fmt = s => { s = Math.round(s); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), r=s%60;
+  return (h ? h+':'+String(m).padStart(2,'0') : m)+':'+String(r).padStart(2,'0'); };
+const parse = v => { v = String(v).trim(); if (/^\d+$/.test(v)) return +v;
+  const p = v.split(':').map(Number); if (p.some(isNaN) || p.length<2 || p.length>3) return NaN;
+  return p.reduce((a,b)=>a*60+b,0); };
+const mode = () => document.querySelector('input[name=mode]:checked').value;
+const labelFor = h => h >= 2160 ? '4K (2160p)' : h >= 1440 ? '1440p' : h + 'p';
+let DUR = 0;
+
+function paint() {
+  const rs=$('rs'), re=$('re'), max=+rs.max||1;
+  const a=+rs.value/max*100, b=+re.value/max*100;
+  $('dimL').style.width = a+'%'; $('dimR').style.width = (100-b)+'%';
+  $('win').style.left = a+'%'; $('win').style.width = (b-a)+'%';
+  $('start').value = fmt(+rs.value); $('end').value = fmt(+re.value); $('len').textContent = fmt(re.value-rs.value);
+}
+$('rs').oninput = () => { const rs=$('rs'), re=$('re');
+  if (+rs.value > +re.value-1) rs.value = +re.value-1;
+  if (+re.value - +rs.value > maxLen()) re.value = Math.min(DUR, +rs.value+maxLen());
+  paint(); };
+$('re').oninput = () => { const rs=$('rs'), re=$('re');
+  if (+re.value < +rs.value+1) re.value = +rs.value+1;
+  if (+re.value - +rs.value > maxLen()) rs.value = Math.max(0, +re.value-maxLen());
+  paint(); };
+function fromText() { if (!DUR) return;
+  let a=parse($('start').value), b=parse($('end').value);
+  if (isNaN(a)||isNaN(b)) { paint(); return; }
+  a=Math.max(0,Math.min(a,DUR-1)); b=Math.max(a+1,Math.min(b,DUR));
+  if (b-a>maxLen()) b=a+maxLen();
+  $('rs').value=a; $('re').value=b; paint(); }
+$('start').onchange = fromText; $('end').onchange = fromText;
+
+function updateMode() {
+  const m = mode();
+  $('clipBox').classList.toggle('hide', m==='full');
+  $('qualityWrap').classList.toggle('hide', m==='short');
+  $('styleWrap').classList.toggle('hide', m!=='short');
+  $('go').textContent = m==='clip' ? 'Download clip' : m==='short' ? 'Create Short' : 'Download full video';
+  $('hint').textContent = m==='clip'
+    ? 'Drag the handles or type a time like 90 or 1:30. Clips can be up to {{ max_clip }} seconds.'
+    : m==='short'
+    ? 'Choose up to {{ max_short }} seconds. The result is a vertical 1080x1920 MP4 for Shorts, Reels and TikTok.'
+    : 'Full videos up to {{ max_full }} minutes. For longer videos, use Clip a part.';
+  if (m!=='full' && DUR && +$('re').value - +$('rs').value > maxLen()) {
+    $('re').value = Math.min(DUR, +$('rs').value + maxLen()); paint();
+  }
+}
+document.querySelectorAll('input[name=mode]').forEach(r => r.onchange = updateMode);
+
+function fillQualities(heights) {
+  const o = [['best','Best available']]; heights.forEach(h => o.push([String(h), labelFor(h)])); o.push(['mp3','Audio only (MP3)']);
+  $('quality').innerHTML = o.map(([v,t]) => `<option value="${v}">${t}</option>`).join('');
+}
+
+$('check').onclick = async () => {
+  msg('Looking up your video…'); $('check').disabled = true;
+  try {
+    const r = await fetch('/api/info', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url:$('url').value})});
+    const d = await r.json(); if (!r.ok) throw new Error(d.error);
+    DUR = Math.floor(d.duration || 0);
+    $('thumb').src = d.thumbnail || ''; $('title').textContent = d.title;
+    $('meta').textContent = [d.platform, d.channel, DUR ? fmt(DUR) : ''].filter(Boolean).join(' · '); markChip(d.platform);
+    fillQualities(d.heights || []);
+    if (DUR) {
+      $('rs').max = $('re').max = DUR; $('rs').value = 0; $('re').value = Math.min(DUR, 20);
+      $('strip').style.backgroundImage = d.thumbnail ? `url("${d.thumbnail}")` : '';
+      $('timeline').classList.remove('empty'); paint();
+    }
+    $('preview').classList.add('show'); $('editor').classList.add('show'); updateMode(); msg('');
+  } catch (e) { msg(e.message, true); }
+  $('check').disabled = false;
+};
+const PRE = {YouTube:/(youtube\.com|youtu\.be)/i, Facebook:/(facebook\.com|fb\.watch)/i, Instagram:/instagram\.com/i, TikTok:/tiktok\.com/i};
+function markChip(name) { document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.p===name)); }
+$('url').addEventListener('input', () => markChip(Object.keys(PRE).find(k => PRE[k].test($('url').value))));
+$('url').addEventListener('keydown', e => { if (e.key==='Enter') $('check').click(); });
+
+const CPA = {{ cpa_url|tojson }}, CPA_CAP = {{ cpa_cap }};
+function openOffer() {
+  if (!CPA) return;
+  try {
+    const last = +localStorage.getItem('cpa_last') || 0;
+    if (Date.now() - last < CPA_CAP * 60000) return;
+    localStorage.setItem('cpa_last', String(Date.now()));
+  } catch (e) {}
+  const cid = (self.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
+  try { navigator.sendBeacon('/api/event', new Blob([JSON.stringify({kind:'cpa_click', extra:cid})], {type:'application/json'})); } catch (e) {}
+  window.open(CPA.split('{clickid}').join(encodeURIComponent(cid)), '_blank', 'noopener,noreferrer');
+}
+
+$('go').onclick = async () => {
+  openOffer();   // must run first, directly inside the click, or popup blockers will stop it
+  const q = $('quality').value;
+  msg(mode()==='clip' ? 'Cutting your clip. This can take up to a minute…' : mode()==='short' ? 'Creating your Short. This can take a minute or two…' : 'Downloading the full video. This can take a few minutes…');
+  $('go').disabled = true; $('go').classList.add('busy');
+  const baseMsg = $('msg').textContent, t0 = Date.now();
+  const timer = setInterval(() => msg(baseMsg + ' (' + Math.round((Date.now()-t0)/1000) + 's)'), 1000);
+  try {
+    const r = await fetch('/api/download', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({url:$('url').value, mode:mode(), start:$('start').value, end:$('end').value, quality:q, style:$('style').value, title:$('title').textContent})});
+    if (!r.ok) throw new Error((await r.json()).error);
+    const blob = await r.blob(); const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = ($('title').textContent || 'video') + (mode()==='short' ? '-short.mp4' : q==='mp3' ? '.mp3' : '.mp4'); a.click();
+    clearInterval(timer); msg('Done. Your file is downloading.');
+  } catch (e) { clearInterval(timer); msg(e.message, true); }
+  $('go').disabled = false; $('go').classList.remove('busy');
+};
+paint();
+</script>
+</body>
+</html>
