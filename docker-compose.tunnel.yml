@@ -1,0 +1,19 @@
+# Use this INSTEAD of docker-compose.yml when you host from home or an Oracle free VM with Cloudflare Tunnel.
+# No open ports, no Caddy, HTTPS comes from Cloudflare.
+#   docker compose -f docker-compose.tunnel.yml up -d --build
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/data
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
+    depends_on:
+      - app
